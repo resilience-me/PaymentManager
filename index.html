@@ -13,34 +13,35 @@
     <section class="page-header">
       <h1 class="project-name">Simplecrowdfund</h1>
       <h2 class="project-tagline"></h2>
-      <a href="https://github.com/resilience-me/simpleCrowdFund" class="btn">View on GitHub</a>
-      <a href="https://github.com/resilience-me/simpleCrowdFund/zipball/master" class="btn">Download .zip</a>
-      <a href="https://github.com/resilience-me/simpleCrowdFund/tarball/master" class="btn">Download .tar.gz</a>
+      <a href="https://github.com/resilience-me/PaymentManager" class="btn">View on GitHub</a>
+      <a href="https://github.com/resilience-me/PaymentManager/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/resilience-me/PaymentManager/tarball/master" class="btn">Download .tar.gz</a>
     </section>
 
     <section class="main-content">
       <h3>
 <a id="simple-crowd-fund" class="anchor" href="#simple-crowd-fund" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Simple crowd-fund</h3>
 
-<div class="highlight highlight-source-js"><pre><span class="pl-c">/* simple contract to log who has contributed to a project, and to return funds manually */</span>
+<div class="highlight highlight-source-js"><pre><span class="pl-c">/* contract to log who has contributed Bitcoin to a project, and to return funds manually */</span>
 
-contract simpleCrowdSale { 
+contract PaymentManager { 
 
-    address owner;
-    address <span class="pl-k">public</span> BTCaddress;
+    address <span class="pl-k">public</span> owner;
+    string <span class="pl-k">public</span> BTCaddress;
 
     struct Funders {
         string username;
         string returnAddress;
         string txID;
-        string returnTX; <span class="pl-c">//if cancelled</span>
+        string returnTX; 
     }
 
     <span class="pl-en">mapping</span> (address <span class="pl-k">=&gt;</span> Funders) <span class="pl-k">public</span> funders;
 
 
-    <span class="pl-k">function</span> <span class="pl-en">simpleCrowdSale</span>(){
-        BTCaddress;
+    <span class="pl-k">function</span> <span class="pl-en">PaymentManager</span>(<span class="pl-smi">address</span> <span class="pl-smi">campaignOwner</span>, <span class="pl-smi">string</span> <span class="pl-smi">PaymentAddress</span>){
+        owner <span class="pl-k">=</span> campaignOwner;
+        BTCaddress <span class="pl-k">=</span> PaymentAddress;
     }
 
     <span class="pl-k">function</span> <span class="pl-en">Fund</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>, <span class="pl-smi">string</span> <span class="pl-smi">username</span>, <span class="pl-smi">string</span> <span class="pl-smi">returnAddress</span>, <span class="pl-smi">string</span> <span class="pl-smi">txID</span>){
@@ -52,7 +53,7 @@ contract simpleCrowdSale {
         funders[v].<span class="pl-smi">txID</span> <span class="pl-k">=</span> txID;
     }
 
-    <span class="pl-k">function</span> <span class="pl-en">GetCrowdSaleAddress</span>() <span class="pl-en">returns</span>(<span class="pl-smi">address</span>){
+    <span class="pl-k">function</span> <span class="pl-en">getPaymentAddress</span>() <span class="pl-en">returns</span>(<span class="pl-smi">string</span>){
         <span class="pl-k">return</span> BTCaddress;
     }    
 
@@ -67,24 +68,171 @@ contract simpleCrowdSale {
         <span class="pl-k">return</span> funders[v];
     }    
 
-}         </pre></div>
+}         
+
+
+contract createPaymentManager {
+
+    address[] campaigns;
+
+    struct Campaign {
+    address campaignOwner;
+    string campaignName;
+    string PaymentAddress;
+    }
+
+    <span class="pl-en">mapping</span> (address <span class="pl-k">=&gt;</span> Campaign) <span class="pl-k">public</span> registered;
+
+
+    <span class="pl-k">function</span> <span class="pl-en">register</span>(<span class="pl-smi">address</span> <span class="pl-smi">campaignOwner</span>, <span class="pl-smi">string</span> <span class="pl-smi">campaignName</span>, <span class="pl-smi">string</span> <span class="pl-smi">PaymentAddress</span>) 
+    {
+        address b <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">PaymentManager</span>(campaignOwner, PaymentAddress);
+        registered[b].<span class="pl-smi">campaignOwner</span> <span class="pl-k">=</span> campaignOwner;
+        registered[b].<span class="pl-smi">campaignName</span> <span class="pl-k">=</span> campaignName;
+        registered[b].<span class="pl-smi">PaymentAddress</span> <span class="pl-k">=</span> PaymentAddress;
+        <span class="pl-smi">campaigns</span>.<span class="pl-c1">push</span>(b);
+    }
+
+    <span class="pl-c">/* get list of all campaigns */</span>
+
+    <span class="pl-k">function</span> <span class="pl-en">getCampaigns</span>() constant <span class="pl-en">returns</span> (<span class="pl-smi">address</span>[]){   
+        <span class="pl-k">return</span> campaigns;
+    }
+
+    <span class="pl-c">/* get details about a campaign */</span>
+
+
+    <span class="pl-k">function</span> <span class="pl-en">getOwner</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>) constant <span class="pl-en">returns</span>(<span class="pl-smi">address</span>){
+    <span class="pl-k">return</span> registered[v].<span class="pl-smi">campaignOwner</span>;
+    }
+
+    <span class="pl-k">function</span> <span class="pl-en">getName</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>) constant <span class="pl-en">returns</span>(<span class="pl-smi">string</span>){
+    <span class="pl-k">return</span> registered[v].<span class="pl-smi">campaignName</span>;
+    }
+
+    <span class="pl-k">function</span> <span class="pl-en">getPaymentAddress</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>) constant <span class="pl-en">returns</span>(<span class="pl-smi">string</span>){
+    <span class="pl-k">return</span> registered[v].<span class="pl-smi">PaymentAddress</span>;
+    }
+
+}   </pre></div>
 
 <h3>
 <a id="abi" class="anchor" href="#abi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ABI</h3>
 
-<pre><code>[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"funders",
-"outputs":[{"name":"username","type":"string"},{"name":"returnAddress","type":"string"},
-{"name":"txID","type":"string"},{"name":"returnTX","type":"string"}],"type":"function"},
-{"constant":true,"inputs":[],"name":"BTCaddress","outputs":[{"name":"","type":"address"}],"type":"function"},
-{"constant":false,"inputs":[{"name":"v","type":"address"},{"name":"username","type":"string"},
-{"name":"returnAddress","type":"string"},{"name":"txID","type":"string"}],
-"name":"Fund","outputs":[],"type":"function"},{"constant":false,"inputs":[],
-"name":"GetCrowdSaleAddress","outputs":[{"name":"","type":"address"}],"type":"function"},
-{"inputs":[],"type":"constructor"}]
+<pre><code>[{"constant":true,"inputs":[{"name":"v","type":"address"}],"name":"getName","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":false,"inputs":[{"name":"campaignOwner","type":"address"},{"name":"campaignName","type":"string"},{"name":"PaymentAddress","type":"string"}],"name":"register","outputs":[],"type":"function"},{"constant":true,"inputs":[],"name":"getCampaigns","outputs":[{"name":"","type":"address[]"}],"type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"registered","outputs":[{"name":"campaignOwner","type":"address"},{"name":"campaignName","type":"string"},{"name":"PaymentAddress","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"v","type":"address"}],"name":"getPaymentAddress","outputs":[{"name":"","type":"string"}],"type":"function"},{"constant":true,"inputs":[{"name":"v","type":"address"}],"name":"getOwner","outputs":[{"name":"","type":"address"}],"type":"function"}]
 </code></pre>
 
+<div class="highlight highlight-text-html-basic"><pre>&lt;!doctype&gt;
+&lt;<span class="pl-ent">html</span>&gt;
+&lt;<span class="pl-ent">head</span>&gt;
+<span class="pl-s1">&lt;<span class="pl-ent">script</span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>text/javascript<span class="pl-pds">'</span></span>&gt;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">var</span> defaultAccount <span class="pl-k">=</span> <span class="pl-smi">web3</span>.<span class="pl-smi">eth</span>.<span class="pl-smi">defaultAccount</span>;</span>
+<span class="pl-s1"><span class="pl-en">console</span>.<span class="pl-c1">log</span>(defaultAccount); <span class="pl-c">// ''</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c">// set the default block</span></span>
+<span class="pl-s1"><span class="pl-smi">web3</span>.<span class="pl-smi">eth</span>.<span class="pl-smi">defaultAccount</span> <span class="pl-k">=</span> <span class="pl-smi">web3</span>.<span class="pl-smi">eth</span>.<span class="pl-smi">accounts</span>[<span class="pl-c1">0</span>];</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">function</span> <span class="pl-en">createPaymentManager</span>() {</span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignOwner <span class="pl-k">=</span> <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>campaignOwner<span class="pl-pds">'</span></span>).<span class="pl-c1">value</span>;</span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignName <span class="pl-k">=</span> <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>campaignName<span class="pl-pds">'</span></span>).<span class="pl-c1">value</span>;</span>
+<span class="pl-s1">    <span class="pl-k">var</span> PaymentAddress <span class="pl-k">=</span> <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>PaymentAddress<span class="pl-pds">'</span></span>).<span class="pl-c1">value</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">var</span> res <span class="pl-k">=</span> contracts[<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager<span class="pl-pds">'</span></span>].<span class="pl-smi">contract</span>.<span class="pl-en">register</span>(campaignOwner, campaignName, PaymentAddress);</span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>registration<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> res;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>campaignAddress<span class="pl-pds">'</span></span>).<span class="pl-c1">value</span> <span class="pl-k">=</span> res;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">function</span> <span class="pl-en">getCampaigns</span>() {</span>
+<span class="pl-s1">    <span class="pl-k">var</span> res <span class="pl-k">=</span> contracts[<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager<span class="pl-pds">'</span></span>].<span class="pl-smi">contract</span>.<span class="pl-en">getCampaigns</span>();</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignList <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span><span class="pl-pds">"</span></span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">for</span>(<span class="pl-k">var</span> i <span class="pl-k">=</span><span class="pl-c1">0</span>;i<span class="pl-k">&lt;</span><span class="pl-smi">res</span>.<span class="pl-c1">length</span>;i<span class="pl-k">++</span>)</span>
+<span class="pl-s1">        {</span>
+<span class="pl-s1">            campaignList <span class="pl-k">+=</span> res[i] <span class="pl-k">+</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;br&gt;<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1">        }</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>campaigns<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> campaignList;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"><span class="pl-k">function</span> <span class="pl-en">getDetails</span>() {</span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignAddress <span class="pl-k">=</span> <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>campaignAddress<span class="pl-pds">'</span></span>).<span class="pl-c1">value</span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignOwner <span class="pl-k">=</span> contracts[<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager<span class="pl-pds">'</span></span>].<span class="pl-smi">contract</span>.<span class="pl-en">getOwner</span>(campaignAddress);</span>
+<span class="pl-s1">    <span class="pl-k">var</span> campaignName <span class="pl-k">=</span> contracts[<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager<span class="pl-pds">'</span></span>].<span class="pl-smi">contract</span>.<span class="pl-en">getName</span>(campaignAddress);</span>
+<span class="pl-s1">    <span class="pl-k">var</span> PaymentAddress <span class="pl-k">=</span> contracts[<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager<span class="pl-pds">'</span></span>].<span class="pl-smi">contract</span>.<span class="pl-en">getPaymentAddress</span>(campaignAddress);</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>results<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;h3&gt;Results:&lt;/h3&gt;<span class="pl-pds">"</span></span>;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>showOwner<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;b&gt;campaign owner:&lt;/b&gt; &lt;br&gt;<span class="pl-pds">"</span></span><span class="pl-k">+</span>campaignOwner;</span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>showName<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;b&gt;campaign name:&lt;/b&gt;&lt;br&gt; <span class="pl-pds">"</span></span><span class="pl-k">+</span> campaignName;</span>
+<span class="pl-s1">    <span class="pl-c1">document</span>.<span class="pl-c1">getElementById</span>(<span class="pl-s"><span class="pl-pds">'</span>showPaymentAddress<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>&lt;b&gt;payment address:&lt;/b&gt;&lt;br&gt; <span class="pl-pds">"</span></span><span class="pl-k">+</span>PaymentAddress;</span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">}</span>
+<span class="pl-s1"></span>
+<span class="pl-s1">&lt;/<span class="pl-ent">script</span>&gt;</span>
+&lt;/<span class="pl-ent">head</span>&gt;
+&lt;<span class="pl-ent">body</span> <span class="pl-e">bgcolor</span>=<span class="pl-s"><span class="pl-pds">'</span>#E6E6FA<span class="pl-pds">'</span></span>&gt;
+    &lt;<span class="pl-ent">h3</span>&gt;Create Payment Manager&lt;/<span class="pl-ent">h3</span>&gt;
+&lt;<span class="pl-ent">div</span>&gt;
+
+
+    &lt;<span class="pl-ent">div</span>&gt;
+    Your ethereum address: &lt;<span class="pl-ent">br</span>&gt;&lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>0x26416b12610d26fd31d227456e9009270574038f<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>campaignOwner<span class="pl-pds">'</span></span>&gt;
+    &lt;/<span class="pl-ent">div</span>&gt;
+
+    &lt;<span class="pl-ent">div</span>&gt;
+    The name of your campaign: &lt;<span class="pl-ent">br</span>&gt;&lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>My Campaign<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>campaignName<span class="pl-pds">'</span></span>&gt;
+    &lt;/<span class="pl-ent">div</span>&gt;
+
+    &lt;<span class="pl-ent">div</span>&gt;
+    Bitcoin address that recieves funds: &lt;<span class="pl-ent">br</span>&gt;&lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>My BTC address<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>PaymentAddress<span class="pl-pds">'</span></span>&gt;
+    &lt;/<span class="pl-ent">div</span>&gt;
+
+    &lt;<span class="pl-ent">button</span> <span class="pl-e">onclick</span>=<span class="pl-s"><span class="pl-pds">'</span>createPaymentManager()<span class="pl-pds">'</span></span>&gt;Register&lt;/<span class="pl-ent">button</span>&gt;
+    &lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>registration<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+
+&lt;/<span class="pl-ent">div</span>&gt;
+    &lt;<span class="pl-ent">br</span>&gt;&lt;<span class="pl-ent">br</span>&gt;
+&lt;<span class="pl-ent">div</span>&gt;
+Get all campaigns:
+    &lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>get<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>button<span class="pl-pds">'</span></span> <span class="pl-e">onclick</span>=<span class="pl-s"><span class="pl-pds">'</span>getCampaigns()<span class="pl-pds">'</span></span> /&gt;
+    &lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>campaigns<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+&lt;/<span class="pl-ent">div</span>&gt;
+&lt;<span class="pl-ent">br</span>&gt;&lt;<span class="pl-ent">br</span>&gt;
+
+&lt;<span class="pl-ent">div</span>&gt;
+
+&lt;<span class="pl-ent">h3</span>&gt;Get Campaign Details&lt;/<span class="pl-ent">h3</span>&gt;
+
+&lt;<span class="pl-ent">div</span>&gt;
+    Campaign Address: &lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>0xed10aab79903893202c19b4b44824f06806c42ae<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>text<span class="pl-pds">'</span></span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>campaignAddress<span class="pl-pds">'</span></span>&gt;
+    &lt;/<span class="pl-ent">div</span>&gt;
+    &lt;<span class="pl-ent">input</span> <span class="pl-e">value</span>=<span class="pl-s"><span class="pl-pds">'</span>get<span class="pl-pds">'</span></span> <span class="pl-e">type</span>=<span class="pl-s"><span class="pl-pds">'</span>button<span class="pl-pds">'</span></span> <span class="pl-e">onclick</span>=<span class="pl-s"><span class="pl-pds">'</span>getDetails()<span class="pl-pds">'</span></span> /&gt;
+
+&lt;<span class="pl-ent">div</span>&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>results<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>showOwner<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+&lt;<span class="pl-ent">br</span>&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>showName<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+    &lt;<span class="pl-ent">br</span>&gt;
+&lt;<span class="pl-ent">div</span> <span class="pl-e">id</span>=<span class="pl-s"><span class="pl-pds">'</span>showPaymentAddress<span class="pl-pds">'</span></span>&gt;&lt;/<span class="pl-ent">div</span>&gt;
+    &lt;/<span class="pl-ent">div</span>&gt;
+&lt;/<span class="pl-ent">div</span>&gt;
+&lt;/<span class="pl-ent">body</span>&gt;
+&lt;/<span class="pl-ent">html</span>&gt;</pre></div>
+
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/resilience-me/simpleCrowdFund">Simplecrowdfund</a> is maintained by <a href="https://github.com/resilience-me">resilience-me</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/resilience-me/PaymentManager">Simplecrowdfund</a> is maintained by <a href="https://github.com/resilience-me">resilience-me</a>.</span>
 
         <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
