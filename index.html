@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Simplecrowdfund by resilience-me</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Simplecrowdfund</h1>
+      <h2 class="project-tagline"></h2>
+      <a href="https://github.com/resilience-me/simpleCrowdFund" class="btn">View on GitHub</a>
+      <a href="https://github.com/resilience-me/simpleCrowdFund/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/resilience-me/simpleCrowdFund/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h3>
+<a id="simple-crowd-fund" class="anchor" href="#simple-crowd-fund" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Simple crowd-fund</h3>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-c">/* simple contract to log who has contributed to a project, and to return funds manually */</span>
+
+contract simpleCrowdSale { 
+
+    address owner;
+    address <span class="pl-k">public</span> BTCaddress;
+
+    struct Funders {
+        string username;
+        string returnAddress;
+        string txID;
+        string returnTX; <span class="pl-c">//if cancelled</span>
+    }
+
+    <span class="pl-en">mapping</span> (address <span class="pl-k">=&gt;</span> Funders) <span class="pl-k">public</span> funders;
+
+
+    <span class="pl-k">function</span> <span class="pl-en">simpleCrowdSale</span>(){
+        BTCaddress;
+    }
+
+    <span class="pl-k">function</span> <span class="pl-en">Fund</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>, <span class="pl-smi">string</span> <span class="pl-smi">username</span>, <span class="pl-smi">string</span> <span class="pl-smi">returnAddress</span>, <span class="pl-smi">string</span> <span class="pl-smi">txID</span>){
+        <span class="pl-k">if</span>(<span class="pl-smi">msg</span>.<span class="pl-smi">sender</span> <span class="pl-k">!=</span> owner)
+            <span class="pl-k">throw</span>;
+        <span class="pl-c">/* funders */</span>
+        funders[v].<span class="pl-smi">username</span> <span class="pl-k">=</span> username;
+        funders[v].<span class="pl-smi">returnAddress</span> <span class="pl-k">=</span> returnAddress;
+        funders[v].<span class="pl-smi">txID</span> <span class="pl-k">=</span> txID;
+    }
+
+    <span class="pl-k">function</span> <span class="pl-en">GetCrowdSaleAddress</span>() <span class="pl-en">returns</span>(<span class="pl-smi">address</span>){
+        <span class="pl-k">return</span> BTCaddress;
+    }    
+
+    <span class="pl-k">function</span> <span class="pl-en">getFunder</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>) internal <span class="pl-en">returns</span>(<span class="pl-smi">Funders</span>){
+        <span class="pl-k">return</span> funders[v];
+    }    
+
+    <span class="pl-k">function</span> <span class="pl-en">returnFunds</span>(<span class="pl-smi">address</span> <span class="pl-smi">v</span>, <span class="pl-smi">string</span> <span class="pl-smi">returnTX</span>) internal <span class="pl-en">returns</span>(<span class="pl-smi">Funders</span>){
+        <span class="pl-k">if</span>(<span class="pl-smi">msg</span>.<span class="pl-smi">sender</span> <span class="pl-k">!=</span> owner)
+            <span class="pl-k">throw</span>;
+        funders[v].<span class="pl-smi">returnTX</span> <span class="pl-k">=</span> returnTX;
+        <span class="pl-k">return</span> funders[v];
+    }    
+
+}         </pre></div>
+
+<h3>
+<a id="abi" class="anchor" href="#abi" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>ABI</h3>
+
+<pre><code>[{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"funders",
+"outputs":[{"name":"username","type":"string"},{"name":"returnAddress","type":"string"},
+{"name":"txID","type":"string"},{"name":"returnTX","type":"string"}],"type":"function"},
+{"constant":true,"inputs":[],"name":"BTCaddress","outputs":[{"name":"","type":"address"}],"type":"function"},
+{"constant":false,"inputs":[{"name":"v","type":"address"},{"name":"username","type":"string"},
+{"name":"returnAddress","type":"string"},{"name":"txID","type":"string"}],
+"name":"Fund","outputs":[],"type":"function"},{"constant":false,"inputs":[],
+"name":"GetCrowdSaleAddress","outputs":[{"name":"","type":"address"}],"type":"function"},
+{"inputs":[],"type":"constructor"}]
+</code></pre>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/resilience-me/simpleCrowdFund">Simplecrowdfund</a> is maintained by <a href="https://github.com/resilience-me">resilience-me</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
